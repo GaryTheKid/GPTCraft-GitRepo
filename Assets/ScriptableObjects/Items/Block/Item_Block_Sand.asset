@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a83ee3071a1f2e4e8970ed6f81fbe19, type: 3}
+  m_Name: Item_Block_Sand
+  m_EditorClassIdentifier: 
+  id: 7
+  itemName: Sand
+  itemIcon: {fileID: -613888633, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: f4a8de7651cac1641a2c791d0b0c3d62, type: 3}
+  isStackable: 1
+  itemSelfDestroyTime: 255

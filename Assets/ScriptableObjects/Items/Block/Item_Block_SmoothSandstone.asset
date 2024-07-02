@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fedf513b580869f49ae42ba6e2cff113, type: 3}
+  m_Name: Item_Block_SmoothSandstone
+  m_EditorClassIdentifier: 
+  id: 17
+  itemName: Smooth Sandstone
+  itemIcon: {fileID: -979730439, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: 10d234a1edb8b2147bc7370354ba97ae, type: 3}
+  isStackable: 1
+  itemSelfDestroyTime: 255
+  craftingResultItemCount: 4
+  craftingRecipe_row1:
+  - {fileID: 11400000, guid: 5c34a466ad637a74cbe049ea96a88b97, type: 2}
+  - {fileID: 11400000, guid: 5c34a466ad637a74cbe049ea96a88b97, type: 2}
+  - {fileID: 0}
+  craftingRecipe_row2:
+  - {fileID: 11400000, guid: 5c34a466ad637a74cbe049ea96a88b97, type: 2}
+  - {fileID: 11400000, guid: 5c34a466ad637a74cbe049ea96a88b97, type: 2}
+  - {fileID: 0}
+  craftingRecipe_row3:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

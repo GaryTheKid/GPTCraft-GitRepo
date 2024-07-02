@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8396c9830d47c7439e595282dfefb60, type: 3}
+  m_Name: Item_Block_WoodenSlab
+  m_EditorClassIdentifier: 
+  id: 10
+  itemName: Wooden Slab
+  itemIcon: {fileID: -1627792472, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: 8e40e09d0acafb54fb0a97622a606fc6, type: 3}
+  isStackable: 1
+  itemSelfDestroyTime: 255
+  craftAuth: 1
+  craftingResultItemCount: 6
+  craftingRecipe_row1:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  craftingRecipe_row2:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  craftingRecipe_row3:
+  - {fileID: 11400000, guid: bca925ad074fcdd4ca76f19a57bc778b, type: 2}
+  - {fileID: 11400000, guid: bca925ad074fcdd4ca76f19a57bc778b, type: 2}
+  - {fileID: 11400000, guid: bca925ad074fcdd4ca76f19a57bc778b, type: 2}
+  combustValue: 2.5

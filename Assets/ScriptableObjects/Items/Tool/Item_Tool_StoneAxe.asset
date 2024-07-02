@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbdfaff3c2048e84d8db9588d3d69e13, type: 3}
+  m_Name: Item_Tool_StoneAxe
+  m_EditorClassIdentifier: 
+  id: 25
+  itemName: Stone Axe
+  itemIcon: {fileID: 1063664870, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: 3734531370543ce4596efd45b702feab, type: 3}
+  isStackable: 0
+  itemSelfDestroyTime: 255
+  craftAuth: 1
+  craftingResultItemCount: 1
+  craftingRecipe_row1:
+  - {fileID: 11400000, guid: 503ee9fc445abd04185754d00abc0494, type: 2}
+  - {fileID: 11400000, guid: 503ee9fc445abd04185754d00abc0494, type: 2}
+  - {fileID: 0}
+  craftingRecipe_row2:
+  - {fileID: 11400000, guid: 503ee9fc445abd04185754d00abc0494, type: 2}
+  - {fileID: 11400000, guid: 60f5ee201b7d98343b2f866e024b72b5, type: 2}
+  - {fileID: 0}
+  craftingRecipe_row3:
+  - {fileID: 0}
+  - {fileID: 11400000, guid: 60f5ee201b7d98343b2f866e024b72b5, type: 2}
+  - {fileID: 0}
+  maxDurability: 100
+  destroyEfficiency: 1
+  destroyEfficiencyBonus_Wood: 2
+  destroyEfficiencyBonus_Stone: 0
+  destroyEfficiencyBonus_SandMud: 0
+  destroyEfficiencyBonus_Plant: 0
+  attackDamage: 6
+  attackSpeed: 1

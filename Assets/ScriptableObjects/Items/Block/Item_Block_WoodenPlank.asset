@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cf0ba712cd0cfb4097fca3ca3d17507, type: 3}
+  m_Name: Item_Block_WoodenPlank
+  m_EditorClassIdentifier: 
+  id: 9
+  itemName: Wooden Plank
+  itemIcon: {fileID: 2063936440, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: 67795635687b51a4c8a349247d4a11e6, type: 3}
+  isStackable: 1
+  itemSelfDestroyTime: 255
+  craftAuth: 0
+  craftingResultItemCount: 4
+  craftingRecipe_row1:
+  - {fileID: 11400000, guid: b92755b8a67f63e44bd5ba75d8e0cde3, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  craftingRecipe_row2:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  craftingRecipe_row3:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  combustValue: 5

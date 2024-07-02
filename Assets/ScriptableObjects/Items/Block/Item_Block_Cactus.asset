@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7760aed48f75d6549b2a1d1059f317f6, type: 3}
+  m_Name: Item_Block_Cactus
+  m_EditorClassIdentifier: 
+  id: 8
+  itemName: Cactus
+  itemIcon: {fileID: 1130486481, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: c3334dbb791b37d4c9728c618e0be56c, type: 3}
+  isStackable: 1
+  itemSelfDestroyTime: 255

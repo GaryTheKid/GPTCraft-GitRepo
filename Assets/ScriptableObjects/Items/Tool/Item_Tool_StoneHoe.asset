@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9d501553d68c14db17e136c7db6edb, type: 3}
+  m_Name: Item_Tool_StoneHoe
+  m_EditorClassIdentifier: 
+  id: 27
+  itemName: StoneHoe
+  itemIcon: {fileID: -1004527914, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: c765d871d25a3d942964beac9631ec73, type: 3}
+  isStackable: 0
+  itemSelfDestroyTime: 255
+  craftAuth: 1
+  craftingResultItemCount: 1
+  craftingRecipe_row1:
+  - {fileID: 11400000, guid: 503ee9fc445abd04185754d00abc0494, type: 2}
+  - {fileID: 11400000, guid: 503ee9fc445abd04185754d00abc0494, type: 2}
+  - {fileID: 0}
+  craftingRecipe_row2:
+  - {fileID: 0}
+  - {fileID: 11400000, guid: 60f5ee201b7d98343b2f866e024b72b5, type: 2}
+  - {fileID: 0}
+  craftingRecipe_row3:
+  - {fileID: 0}
+  - {fileID: 11400000, guid: 60f5ee201b7d98343b2f866e024b72b5, type: 2}
+  - {fileID: 0}
+  maxDurability: 100
+  destroyEfficiency: 1
+  destroyEfficiencyBonus_Wood: 0
+  destroyEfficiencyBonus_Stone: 0
+  destroyEfficiencyBonus_SandMud: 0
+  destroyEfficiencyBonus_Plant: 0

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2a614fe8b919d642b1f74a8ba9a5962, type: 3}
+  m_Name: Item_Food_RuttenFlesh
+  m_EditorClassIdentifier: 
+  id: 33
+  itemName: Rutten Flesh
+  itemIcon: {fileID: 366066858, guid: 1e847dedd09b87a44bb4713d1b0db0c7, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: 31f12a3d3e46a974fabe1f62042ab790, type: 3}
+  isStackable: 1
+  itemSelfDestroyTime: 255
+  craftAuth: 0
+  craftingResultItemCount: 0
+  craftingRecipe_row1: []
+  craftingRecipe_row2: []
+  craftingRecipe_row3: []

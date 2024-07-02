@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d63f1ff69bde09a49a5606581238a0c4, type: 3}
+  m_Name: Item_Tool_TestTool
+  m_EditorClassIdentifier: 
+  id: 2
+  itemName: Test Tool
+  itemIcon: {fileID: 21300000, guid: 65f0e363b74cf5845ab8c3fbc14f39ac, type: 3}
+  itemPrefab: {fileID: 7178191589200727309, guid: 6bbd8ac32b0bbdd4cb94314aacdccb22, type: 3}
+  isStackable: 0
+  itemSelfDestroyTime: 255
+  durability: 30
+  maxDurability: 30
+  destroyEfficiency: 4
+  destroyEfficiencyBonus_Wood: 0
+  destroyEfficiencyBonus_Stone: 1
+  destroyEfficiencyBonus_SandMud: 0
+  destroyEfficiencyBonus_Plant: 0

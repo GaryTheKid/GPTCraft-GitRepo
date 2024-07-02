@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e17e0cac5f840041ac93da9e8bb438b, type: 3}
+  m_Name: Mob_Neutral_Spider
+  m_EditorClassIdentifier: 
+  id: 1
+  mobName: Spider
+  mobPrefab: {fileID: 2771602984105295743, guid: 3c41a525cf694b34cb7325d50b688c98, type: 3}
+  mobSpawnTime: 1
+  mobSpawnBiomes: 0000000003000000
+  isSunlightSensitive: 0
+  mobDeathDropItemPrefab: {fileID: 7178191589200727309, guid: 20db946c21a0a2848bba9be3890ca39b, type: 3}
+  moveSpeed: 3
+  turnSpeed: 1
+  jumpForce: 1.5
+  explorationRange: 10
+  mobHeight: 1
+  maxHP: 12
+  attackDamage: 2
+  attackSpeed: 1
+  attackRange: 2
