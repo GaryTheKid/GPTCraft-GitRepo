@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ResourceAssets : MonoBehaviour
 {
@@ -67,6 +68,28 @@ public class ResourceAssets : MonoBehaviour
         foreach (Mob mobSO in mobScriptableObjects)
         {
             mobs.Add(mobSO.id, mobSO);
+        } 
+    }
+
+    public byte GetMob(MobSpawnTime mobSpawnTime, BiomeType mobBiomeType, byte mobMaxHeight, out bool isQualifiedMobExist)
+    {
+        print(mobSpawnTime.ToString() + " " + mobBiomeType.ToString() + " " + mobMaxHeight);
+
+        List<Mob> selectedMobs = mobs.Where(mob => (mob.Value.mobSpawnTime == MobSpawnTime.FullTime || mob.Value.mobSpawnTime == mobSpawnTime)
+                                                && mob.Value.mobSpawnBiomes.Contains(mobBiomeType)
+                                                && mob.Value.mobHeight <= mobMaxHeight)
+            .Select(mob => mob.Value)
+            .ToList();
+
+        print(selectedMobs.Count);
+
+        if (selectedMobs == null || selectedMobs.Count == 0)
+        {
+            isQualifiedMobExist = false;
+            return 0;
         }
+
+        isQualifiedMobExist = true;
+        return selectedMobs[Random.Range(0, selectedMobs.Count)].id;
     }
 }

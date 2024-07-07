@@ -2,15 +2,17 @@ using UnityEngine;
 
 public class MobTargetLock : MonoBehaviour
 {
-    public MobWorldController mobClass;
+    public MobWorldController mobController;
 
     private void OnTriggerEnter(Collider other)
     {
-        mobClass.chaseTarget = other.transform;
+        if(mobController.mobClass is IAggressiveMob) 
+            mobController.chaseTarget = other.transform;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        mobClass.chaseTarget = null;
+        if (mobController.mobClass is IAggressiveMob)
+            mobController.chaseTarget = null;
     }
 }

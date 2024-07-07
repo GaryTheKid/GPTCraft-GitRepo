@@ -25944,12 +25944,13 @@ MonoBehaviour:
   minSpawnDistance: 10
   spawnHeightRange: 5
   maxEnemies: 5
+  mobsPerFrame: 5
+  mobSpawnMaxRuntime: 20
   spawnedMobs: []
   activeSpawnedMobs: []
-  mobsPerFrame: 5
+  itemsPerFrame: 5
   spawnedItems: []
   activeSpawnedItems: []
-  itemsPerFrame: 5
 --- !u!1 &894290433
 GameObject:
   m_ObjectHideFlags: 0
@@ -35943,7 +35944,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1275326324
 Transform:
   m_ObjectHideFlags: 0

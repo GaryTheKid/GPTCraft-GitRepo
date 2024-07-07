@@ -8,38 +8,45 @@ public class WorldObjectSpawner : MonoBehaviour
 
     // singleton
     public static WorldObjectSpawner singleton;
+    private TerrainManager terrainManager;
+    private TimeManager timeManager;
+    private ResourceAssets resourceAssets;
 
+
+    [Header("====== General Spawn Settings ======")]
     public int maxSpawnDistance = 20;
     public int minSpawnDistance = 10;
     public int spawnHeightRange = 5;
     public int maxEnemies = 5;
     private Vector3 lastPlayerPos;
 
-    // AI
+
+    [Space(15)]
+    [Header("====== Mob Spawn Settings ======")]
+    public int mobsPerFrame;
+    public int mobSpawnMaxRuntime;
+    private int mobLoadCounter;
     public List<GameObject> spawnedMobs = new List<GameObject>();
     public List<GameObject> activeSpawnedMobs = new List<GameObject>();
-    private List<Vector3Int> availableSpawnPoints_H1 = new List<Vector3Int>();
-    private List<Vector3Int> availableSpawnPoints_H2 = new List<Vector3Int>();
-    private List<Vector3Int> availableSpawnPoints_H3 = new List<Vector3Int>();
-
-    private int mobLoadCounter;
-    public int mobsPerFrame;
-
+    private List<Vector3Int> availableSpawnPoints = new List<Vector3Int>();
+    private Dictionary<Vector3Int, byte> availableSpawnPointMaxHeight = new Dictionary<Vector3Int, byte>();
     private HashSet<GameObject> mobsToLoad = new HashSet<GameObject>();
     private HashSet<GameObject> mobsToUnload = new HashSet<GameObject>();
     private IEnumerator currentMobUpdateCoroutine = null;
 
-    // Item
+
+    [Space(15)]
+    [Header("====== Item Spawn Settings ======")]
+    public int itemsPerFrame;
+    private int itemLoadCounter;
     public List<GameObject> spawnedItems = new List<GameObject>();
     public List<GameObject> activeSpawnedItems = new List<GameObject>();
-
-    private int itemLoadCounter;
-    public int itemsPerFrame;
-
     private HashSet<GameObject> itemsToLoad = new HashSet<GameObject>();
     private HashSet<GameObject> itemsToUnload = new HashSet<GameObject>();
     private IEnumerator currentItemUpdateCoroutine = null;
 
+
+    #region Unity Functions
     private void Awake()
     {
         if (singleton == null)
@@ -47,7 +54,12 @@ public class WorldObjectSpawner : MonoBehaviour
             singleton = this;
         }
     }
-
+    private void Start()
+    {
+        terrainManager = TerrainManager.singleton;
+        timeManager = TimeManager.singleton;
+        resourceAssets = ResourceAssets.singleton;
+    }
     private void Update()
     {
         if (Vector3.Distance(PlayerStats.Global_playerWorldCoord, lastPlayerPos) > minSpawnDistance)
@@ -58,7 +70,77 @@ public class WorldObjectSpawner : MonoBehaviour
             lastPlayerPos = PlayerStats.Global_playerWorldCoord;
         }
     }
+    #endregion
 
+
+    #region Mob Spawn
+    public GameObject SpawnMob(Vector3Int worldCoord, byte mobID)
+    {
+        // 实例化AI
+        Mob mob = resourceAssets.mobs[mobID];
+        GameObject mobObj = Instantiate(mob.mobPrefab, Vector3.one * 0.5f + worldCoord, Quaternion.identity);
+        MobWorldController mobWorld = mobObj.GetComponent<MobWorldController>();
+        mobWorld.SetMobClass(mob);
+
+        return mobObj;
+    }
+    public void SpawnMobsNearPlayer() // 后期引入难度、方块光照/类型、世界地形等因素，来影响不同的怪物生成
+    {
+        UpdateAvailableSpawnPointsNearPlayer();
+
+        // check if no space to spawn
+        if (availableSpawnPoints == null || availableSpawnPoints.Count == 0 || availableSpawnPointMaxHeight == null || availableSpawnPointMaxHeight.Count == 0)
+        {
+            Debug.Log("No Space to Spawn");
+            return;
+        }
+
+        StartCoroutine(SpawnMobsNearPlayerCoroutine());
+    }
+    private IEnumerator SpawnMobsNearPlayerCoroutine()
+    {
+        int mobSpawnCounter = 0;
+        int mobSpawnRuntime = 0;
+
+        while (activeSpawnedMobs.Count < maxEnemies)
+        {
+            if (TrySpawnMob())
+            {
+                mobSpawnCounter++;
+                if (mobSpawnCounter % mobsPerFrame == 0)
+                {
+                    yield return null; // 可以根据需要调整yield的使用，以平衡性能
+                }
+            }
+
+            mobSpawnRuntime++;
+            if (mobSpawnRuntime >= mobSpawnMaxRuntime) yield break;
+        }
+    }
+    private bool TrySpawnMob()
+    {
+        if (availableSpawnPoints == null || availableSpawnPoints.Count == 0 || availableSpawnPointMaxHeight == null || availableSpawnPointMaxHeight.Count == 0) return false;
+
+        Vector3Int spawnCoord = availableSpawnPoints[Random.Range(0, availableSpawnPoints.Count)];
+        BiomeType spawnBiomeType = terrainManager.GetWorldCoordBiomeType(spawnCoord);
+        byte spawnMobID = resourceAssets.GetMob(timeManager.ConvertToMobSpawnTime(), spawnBiomeType, availableSpawnPointMaxHeight[spawnCoord], out bool isQualifiedMobExist);
+
+        print(isQualifiedMobExist);
+
+        if (!isQualifiedMobExist) return false;
+
+        GameObject enemy = SpawnMob(spawnCoord, spawnMobID);
+        spawnedMobs.Add(enemy);
+
+        availableSpawnPoints.Remove(spawnCoord);
+        availableSpawnPointMaxHeight.Remove(spawnCoord);
+
+        return true;
+    }
+    #endregion
+
+
+    #region Mob Dynamic Loading
     public void HandleMobDynamicLoading(Vector3Int playerChunkPosition)
     {
         if (playerChunkPosition != lastPlayerPos)
@@ -72,7 +154,6 @@ public class WorldObjectSpawner : MonoBehaviour
             StartCoroutine(currentMobUpdateCoroutine);
         }
     }
-
     private void UpdateMobsToLoadAndUnload(Vector3Int playerChunkPosition)
     {
         mobsToLoad.Clear();
@@ -104,7 +185,6 @@ public class WorldObjectSpawner : MonoBehaviour
             }
         }
     }
-
     public IEnumerator UpdateMobLoadingCoroutine()
     {
         mobLoadCounter = 0;
@@ -133,82 +213,10 @@ public class WorldObjectSpawner : MonoBehaviour
             }
         }
     }
+    #endregion
 
-    public void HandleItemDynamicLoading(Vector3Int playerChunkPosition)
-    {
-        if (playerChunkPosition != lastPlayerPos)
-        {
-            UpdateItemsToLoadAndUnload(playerChunkPosition);
-            if (currentItemUpdateCoroutine != null)
-            {
-                StopCoroutine(currentItemUpdateCoroutine);
-            }
-            currentItemUpdateCoroutine = UpdateItemLoadingCoroutine();
-            StartCoroutine(currentItemUpdateCoroutine);
-        }
-    }
 
-    private void UpdateItemsToLoadAndUnload(Vector3Int playerChunkPosition)
-    {
-        itemsToLoad.Clear();
-        itemsToUnload.Clear();
-
-        foreach (var item in spawnedItems)
-        {
-            if (item == null && item.activeInHierarchy)
-            {
-                continue;
-            }
-
-            if (Vector3.Distance(item.transform.position, playerChunkPosition) <= maxSpawnDistance)
-            {
-                itemsToLoad.Add(item);
-            }
-        }
-
-        foreach (var activeitem in activeSpawnedItems)
-        {
-            if (activeitem == null && !activeitem.activeInHierarchy)
-            {
-                continue;
-            }
-
-            if (Vector3.Distance(activeitem.transform.position, playerChunkPosition) > maxSpawnDistance)
-            {
-                itemsToUnload.Add(activeitem);
-            }
-        }
-    }
-
-    public IEnumerator UpdateItemLoadingCoroutine()
-    {
-        itemLoadCounter = 0;
-
-        // 处理加载
-        foreach (var item in itemsToLoad)
-        {
-            item.SetActive(true);
-
-            itemLoadCounter++;
-            if (itemLoadCounter % itemsPerFrame == 0)
-            {
-                yield return null; // 可以根据需要调整yield的使用，以平衡性能
-            }
-        }
-
-        // 处理卸载
-        foreach (var item in itemsToUnload)
-        {
-            item.SetActive(false);
-
-            itemLoadCounter++;
-            if (itemLoadCounter % itemsPerFrame == 0)
-            {
-                yield return null; // 可以根据需要调整yield的使用，以平衡性能
-            }
-        }
-    }
-
+    #region Item Spawn
     public void SpawnItem(Vector3Int worldCood, byte itemID, int amount)
     {
         // 实例化道具
@@ -248,12 +256,11 @@ public class WorldObjectSpawner : MonoBehaviour
 
         spawnedItems.Add(itemObj);
     }
-
     public void PopItemToDirection(Vector3 pos, Vector3 dir, ItemData itemData, int amount)
     {
         // 实例化道具
         ItemData itemDataCopy = itemData.GetCopy();
-        Item item = ResourceAssets.singleton.items[itemDataCopy.id];
+        Item item = resourceAssets.items[itemDataCopy.id];
         GameObject itemObj = Instantiate(item.itemPrefab, pos, Quaternion.identity);
         ItemWorldObject itemWorld = itemObj.GetComponent<ItemWorldObject>();
 
@@ -281,90 +288,90 @@ public class WorldObjectSpawner : MonoBehaviour
 
         spawnedItems.Add(itemObj);
     }
+    #endregion
 
-    public GameObject SpawnMob(Vector3Int worldCood, byte mobID)
+
+    #region Item Dynamic Loading
+    public void HandleItemDynamicLoading(Vector3Int playerChunkPosition)
     {
-        // 实例化AI
-        Mob mob = ResourceAssets.singleton.mobs[mobID];
-        GameObject mobObj = Instantiate(mob.mobPrefab, Vector3.one * 0.5f + worldCood, Quaternion.identity);
-        MobWorldController mobWorld = mobObj.GetComponent<MobWorldController>();
-        mobWorld.SetMobClass(mob);
-
-        return mobObj;
-    }
-
-    public void SpawnMobsNearPlayer() // 后期引入难度、方块光照/类型、世界地形等因素，来影响不同的怪物生成
-    {
-        UpdateAvailableSpawnPointsNearPlayer();
-
-        // check if no space to spawn
-        if (availableSpawnPoints_H1 == null || availableSpawnPoints_H1.Count == 0 ||
-            availableSpawnPoints_H2 == null || availableSpawnPoints_H2.Count == 0 ||
-            availableSpawnPoints_H3 == null || availableSpawnPoints_H3.Count == 0)
+        if (playerChunkPosition != lastPlayerPos)
         {
-            Debug.Log("No Space to Spawn");
-            return;
+            UpdateItemsToLoadAndUnload(playerChunkPosition);
+            if (currentItemUpdateCoroutine != null)
+            {
+                StopCoroutine(currentItemUpdateCoroutine);
+            }
+            currentItemUpdateCoroutine = UpdateItemLoadingCoroutine();
+            StartCoroutine(currentItemUpdateCoroutine);
+        }
+    }
+    private void UpdateItemsToLoadAndUnload(Vector3Int playerChunkPosition)
+    {
+        itemsToLoad.Clear();
+        itemsToUnload.Clear();
+
+        foreach (var item in spawnedItems)
+        {
+            if (item == null && item.activeInHierarchy)
+            {
+                continue;
+            }
+
+            if (Vector3.Distance(item.transform.position, playerChunkPosition) <= maxSpawnDistance)
+            {
+                itemsToLoad.Add(item);
+            }
         }
 
-        StartCoroutine(SpawnMobsNearPlayerCoroutine());
-    }
-
-    private IEnumerator SpawnMobsNearPlayerCoroutine()
-    {
-        int mobSpawnCounter = 0;
-
-        while (activeSpawnedMobs.Count < maxEnemies)
+        foreach (var activeitem in activeSpawnedItems)
         {
+            if (activeitem == null && !activeitem.activeInHierarchy)
+            {
+                continue;
+            }
 
+            if (Vector3.Distance(activeitem.transform.position, playerChunkPosition) > maxSpawnDistance)
+            {
+                itemsToUnload.Add(activeitem);
+            }
+        }
+    }
+    public IEnumerator UpdateItemLoadingCoroutine()
+    {
+        itemLoadCounter = 0;
 
-            // TODO: roll a value for spawned enemy type
-            // if enemy height == 3
-            TrySpawnEnemy_H3();
+        // 处理加载
+        foreach (var item in itemsToLoad)
+        {
+            item.SetActive(true);
 
-            // if enemy height == 2
-            TrySpawnEnemy_H2();
+            itemLoadCounter++;
+            if (itemLoadCounter % itemsPerFrame == 0)
+            {
+                yield return null; // 可以根据需要调整yield的使用，以平衡性能
+            }
+        }
 
-            // if enemy height == 1
-            TrySpawnEnemy_H1();
+        // 处理卸载
+        foreach (var item in itemsToUnload)
+        {
+            item.SetActive(false);
 
-            mobSpawnCounter++;
-            if (mobSpawnCounter % mobsPerFrame == 0)
+            itemLoadCounter++;
+            if (itemLoadCounter % itemsPerFrame == 0)
             {
                 yield return null; // 可以根据需要调整yield的使用，以平衡性能
             }
         }
     }
+    #endregion
 
-    private void TrySpawnEnemy_H1()
-    {
-        Vector3Int spawnCoord = availableSpawnPoints_H1[Random.Range(0, availableSpawnPoints_H1.Count)];
-        GameObject enemy = SpawnMob(spawnCoord, Mob_Hostile_Zombie.refID);
-        spawnedMobs.Add(enemy);
-        availableSpawnPoints_H1.Remove(spawnCoord);
-        try { availableSpawnPoints_H2.Remove(spawnCoord); } catch { }
-        try { availableSpawnPoints_H3.Remove(spawnCoord); } catch { }
-    }
-    private void TrySpawnEnemy_H2()
-    {
-        Vector3Int spawnCoord = availableSpawnPoints_H2[Random.Range(0, availableSpawnPoints_H1.Count)];
-        GameObject enemy = SpawnMob(spawnCoord, Mob_Hostile_Zombie.refID);
-        spawnedMobs.Add(enemy);
-        availableSpawnPoints_H2.Remove(spawnCoord);
-        try { availableSpawnPoints_H3.Remove(spawnCoord); } catch { }
-    }
-    private void TrySpawnEnemy_H3()
-    {
-        Vector3Int spawnCoord = availableSpawnPoints_H3[Random.Range(0, availableSpawnPoints_H1.Count)];
-        GameObject enemy = SpawnMob(spawnCoord, Mob_Hostile_Zombie.refID);
-        spawnedMobs.Add(enemy);
-        availableSpawnPoints_H3.Remove(spawnCoord);
-    }
 
+    #region Utitilies
     private void UpdateAvailableSpawnPointsNearPlayer()
     {
-        availableSpawnPoints_H1.Clear();
-        availableSpawnPoints_H2.Clear();
-        availableSpawnPoints_H3.Clear();
+        availableSpawnPoints.Clear();
+        availableSpawnPointMaxHeight.Clear();
 
         for (int x = -maxSpawnDistance; x <= maxSpawnDistance; x++)
         {
@@ -383,20 +390,17 @@ public class WorldObjectSpawner : MonoBehaviour
                     switch (spawnVal)
                     {
                         case -1: { continue; }
-                        case 1: { availableSpawnPoints_H1.Add(coord); } break;
-                        case 2: { availableSpawnPoints_H1.Add(coord); availableSpawnPoints_H2.Add(coord); } break;
-                        case 3: { availableSpawnPoints_H1.Add(coord); availableSpawnPoints_H2.Add(coord); availableSpawnPoints_H3.Add(coord); } break;
+                        default: { availableSpawnPoints.Add(coord); availableSpawnPointMaxHeight[coord] = (byte)spawnVal; } break;
                     }
                 }
             }
         }
     }
-
     private int IsSpawnPoint(Vector3Int worldCoord)
     {
         int maxSpawnHeight = -1;
 
-        if (!TerrainManager.singleton.GetWorldCoordBlockExistence(worldCoord + new Vector3Int(0, -1, 0)))
+        if (!TerrainManager.singleton.IsBlockExist(worldCoord + new Vector3Int(0, -1, 0)))
         {
             return maxSpawnHeight;
         }
@@ -404,7 +408,7 @@ public class WorldObjectSpawner : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             Vector3Int tileAbove = worldCoord + new Vector3Int(0, i, 0);
-            if (!TerrainManager.singleton.GetWorldCoordBlockExistence(tileAbove))
+            if (!TerrainManager.singleton.IsBlockExist(tileAbove))
             {
                 maxSpawnHeight = i + 1;
             }
@@ -416,4 +420,5 @@ public class WorldObjectSpawner : MonoBehaviour
 
         return maxSpawnHeight;
     }
+    #endregion
 }

@@ -1,43 +1,54 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MobWorldController : MonoBehaviour
 {
+    // singletons
+    private TimeManager timeManager;
+    private WorldObjectSpawner worldObjectSpawner;
+
+    // binding properties
     private Pathfinding pf;
     private Rigidbody rb;
     private MobBrain mobBrain;
 
+    [Header("====== Mob Properties ======")]
     public Transform avatar;
     public Mob mobClass;
     public MobData mobData;
+    private Vector3 lastDamageTakenDir;
+    private Coroutine terrifiedCoroutine;
+    private Coroutine sunburnCoroutine;
 
+    [Header("====== Path Finding ======")]
     public Vector3Int worldCoord;
     public List<Vector3Int> path;
     public bool hasHillAtFront;
     private Pathfinding.Node[,,] allNodes;
     private List<Pathfinding.Node> walkableNodes;
     private int targetIndex = 0; // 当前路径点索引
-
     public Transform chaseTarget;
     private Vector3Int chaseTargetCoord;
 
+
+    #region Unity Functions
     private void Awake()
     {
         pf = GetComponent<Pathfinding>();
         rb = GetComponent<Rigidbody>();
         mobBrain = GetComponent<MobBrain>();
     }
-
     private void Start()
     {
         mobData.hp = mobClass.maxHP; // 初始化当前生命值为最大生命值
+        timeManager = TimeManager.singleton;
+        worldObjectSpawner = WorldObjectSpawner.singleton;
     }
-
     private void OnEnable()
     {
         WorldObjectSpawner.singleton.activeSpawnedMobs.Add(gameObject);
     }
-
     private void OnDisable()
     {
         WorldObjectSpawner.singleton.activeSpawnedMobs.Remove(gameObject);
@@ -45,32 +56,32 @@ public class MobWorldController : MonoBehaviour
         ResetMob();
         mobBrain.ResetMobBrain();
     }
-
     private void OnDestroy()
     {
         WorldObjectSpawner.singleton.spawnedMobs.Remove(gameObject);
     }
-
     private void Update()
     {
         HandleMovement();
+        HandleSunburn();
     }
+    #endregion
 
+
+    #region Mob Setting
     public void SetMobClass(Mob mob)
     {
         mobClass = mob;
         mobData = mobClass.CreateMobData();
-        mobBrain.SetMobBrain(mobClass);
+        mobBrain.SetMobBrain(mobClass, mobData);
 
         ResetMobStats();
         ResetMob();
     }
-
     public void ResetMobStats()
     {
         mobData.hp = mobClass.maxHP;
     }
-
     public void ResetMob()
     {
         path = null;
@@ -81,7 +92,10 @@ public class MobWorldController : MonoBehaviour
         chaseTarget = null;
         chaseTargetCoord = Vector3Int.zero;
     }
+    #endregion
 
+
+    #region Pathfinding
     public void UpdateWalkableNodes()
     {
         allNodes = pf.FindWalkNodes(worldCoord, mobClass.explorationRange, mobClass.mobHeight);
@@ -96,7 +110,6 @@ public class MobWorldController : MonoBehaviour
             }
         }
     }
-
     public void RoamToRandomCoord()
     {
         if (allNodes == null || allNodes.Length == 0)
@@ -116,7 +129,47 @@ public class MobWorldController : MonoBehaviour
         targetIndex = 0;
         path = pf.FindPath(allNodes, worldCoord, randomCoord, mobClass.explorationRange);
     }
+    public void FleeToRandomCoord()
+    {
+        if (allNodes == null || allNodes.Length == 0)
+        {
+            return;
+        }
 
+        if (walkableNodes == null || walkableNodes.Count == 0)
+        {
+            return;
+        }
+
+        List<Pathfinding.Node> filteredNodes = new List<Pathfinding.Node>();
+
+        // 根据上次收到伤害的方向，来定向选择部分可移动的格子
+        if (lastDamageTakenDir != Vector3.zero)
+        {
+            foreach (Pathfinding.Node node in walkableNodes)
+            {
+                Vector3Int dirInt = node.position - worldCoord;
+                Vector3 nodeDir = new Vector3(dirInt.x, dirInt.y, dirInt.z).normalized;
+                // 如果方向一致，加入到 filteredNodes
+                if (Vector3.Dot(nodeDir, lastDamageTakenDir.normalized) > 0.5f) // 这里的 0.5 是一个阈值，可以根据需要调整
+                {
+                    filteredNodes.Add(node);
+                }
+            }
+        }
+
+        // 如果没有符合条件的节点，则随机选择一个节点
+        if (filteredNodes.Count == 0)
+        {
+            filteredNodes = walkableNodes;
+        }
+
+        Vector3Int randomCoord = filteredNodes[Random.Range(0, filteredNodes.Count)].position;
+
+        // 其他逻辑...
+        targetIndex = 0;
+        path = pf.FindPath(allNodes, worldCoord, randomCoord, mobClass.explorationRange);
+    }
     public void UpdateChaseTargetCoord()
     {
         // 定义射线起点为当前位置
@@ -139,7 +192,6 @@ public class MobWorldController : MonoBehaviour
             chaseTargetCoord = new Vector3Int(Mathf.FloorToInt(hitPoint.x), Mathf.FloorToInt(hitPoint.y), Mathf.FloorToInt(hitPoint.z));
         }
     }
-
     public void ChaseTargetCoord()
     {
         if (allNodes == null || allNodes.Length == 0)
@@ -155,8 +207,11 @@ public class MobWorldController : MonoBehaviour
         targetIndex = 0;
         path = pf.FindPath(allNodes, worldCoord, chaseTargetCoord, mobClass.explorationRange);
     }
+    #endregion
 
-    public void HandleMovement()
+
+    #region Movement
+    private void HandleMovement()
     {
         if (path == null || path.Count == 0)
         {
@@ -198,17 +253,24 @@ public class MobWorldController : MonoBehaviour
             }
         }
     }
-
     private void Jump()
     {
         // 施加一个向上的力来执行跳跃
         rb.AddForce(Vector3.up * mobClass.jumpForce * Time.deltaTime);
     }
+    public void UpdateWorldCoord(Vector3 worldPosXZ)
+    {
+        worldCoord = new Vector3Int(Mathf.FloorToInt(worldPosXZ.x), Mathf.FloorToInt(worldPosXZ.y), Mathf.FloorToInt(worldPosXZ.z));
+    }
+    #endregion
 
-    public void TakeDamage(short damage)
+
+    #region Survival
+    public void TakeDamage(Transform attacker, short damage)
     {
         if (mobData.hp > 0)
         {
+            lastDamageTakenDir = transform.position - attacker.position; // 储存收到伤害的方向
             mobData.hp -= damage; // 减去伤害值
             if (mobData.hp <= 0)
             {
@@ -217,21 +279,83 @@ public class MobWorldController : MonoBehaviour
             else
             {
                 Debug.Log("Enemy took " + damage + " damage. Current HP: " + mobData.hp);
+                StartTerrified(mobClass.terrifiedStateLength);
             }
         }
     }
+    public void StartTerrified(float duration)
+    {
+        if (terrifiedCoroutine != null)
+        {
+            StopCoroutine(terrifiedCoroutine);
+        }
+        terrifiedCoroutine = StartCoroutine(Terrified(duration));
+    }
+    private IEnumerator Terrified(float duration)
+    {
+        mobData.isTerrified = true;
+        mobData.moveSpeed = mobData.terrifiedMoveSpeed;
+        mobData.turnSpeed = mobData.terrifiedturnSpeed;
+        Debug.Log("Enemy is terrified!");
 
+        yield return new WaitForSeconds(duration);
+
+        mobData.isTerrified = false;
+        mobData.moveSpeed = mobClass.moveSpeed;
+        mobData.turnSpeed = mobClass.turnSpeed;
+        Debug.Log("Enemy is no longer terrified!");
+
+        terrifiedCoroutine = null;
+    }
+    private void HandleSunburn()
+    {
+        if (mobClass.isSunlightSensitive && timeManager.CurrentDayNightState == TimeManager.DayNightState.Day) InitSunburn();
+        else StopSunburn();
+    }
+    private void InitSunburn()
+    {
+        if (sunburnCoroutine == null)
+        {
+            sunburnCoroutine = StartCoroutine(Sunburn());
+        }
+    }
+    private void StopSunburn()
+    {
+        if (sunburnCoroutine != null)
+        {
+            StopCoroutine(sunburnCoroutine);
+            sunburnCoroutine = null;
+        }
+    }
+    private IEnumerator Sunburn()
+    {
+        while (mobClass.isSunlightSensitive && timeManager.CurrentDayNightState == TimeManager.DayNightState.Day)
+        {
+            TakeDamage(transform, DefaultStats.GLOBAL_STATS_SUNBURN_DAMAGE);
+            yield return new WaitForSeconds(DefaultStats.GLOBAL_STATS_SUNBURN_CD);
+        }
+
+        sunburnCoroutine = null;
+    }
     private void Die()
     {
         Debug.Log("Enemy died!");
         // 此处可以添加敌人死亡的逻辑，例如播放死亡动画、产生死亡效果等
         // 你可以在这里销毁敌人对象或进行其他你需要的处理
 
+        // 爆道具
+        worldObjectSpawner.SpawnItem(GetMobPosInt(), mobClass.mobDeathDropItem.id, 1);
+
         Destroy(gameObject);
     }
+    #endregion
 
-    public void SetWorldCoord(Vector3 worldPosXZ)
+
+    #region Utilities
+    private Vector3Int GetMobPosInt()
     {
-        worldCoord = new Vector3Int(Mathf.FloorToInt(worldPosXZ.x), Mathf.FloorToInt(worldPosXZ.y), Mathf.FloorToInt(worldPosXZ.z));
+        Vector3 mobPos = transform.position;
+        return new Vector3Int((int)mobPos.x, (int)mobPos.y, (int)mobPos.z);
     }
+    #endregion
 }

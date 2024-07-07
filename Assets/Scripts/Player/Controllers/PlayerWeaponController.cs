@@ -50,7 +50,7 @@ public class PlayerWeaponController : MonoBehaviour
         {
             if (enemy != null)
             {
-                enemy.TakeDamage(stats.INTERACTION_attackDamage);
+                enemy.TakeDamage(transform, stats.INTERACTION_attackDamage);
 
                 if (stats.EQUIPMENT_equippedItem is IDurable)
                 {

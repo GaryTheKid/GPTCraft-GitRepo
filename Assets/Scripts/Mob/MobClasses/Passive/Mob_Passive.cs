@@ -2,6 +2,10 @@ public abstract class Mob_Passive : Mob
 {
     public override MobData CreateMobData()
     {
-        return new MobData(id, maxHP, moveSpeed, turnSpeed);
+        MobData newMobData = new MobData(id, maxHP, moveSpeed, turnSpeed);
+        newMobData.terrifiedMoveSpeed = moveSpeed * terrifiedSpeedBoostPercentage;
+        newMobData.terrifiedturnSpeed = turnSpeed * terrifiedSpeedBoostPercentage;
+        return newMobData;
+
     }
 }

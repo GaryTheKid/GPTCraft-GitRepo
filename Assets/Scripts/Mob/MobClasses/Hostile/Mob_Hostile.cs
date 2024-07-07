@@ -26,6 +26,9 @@ public abstract class Mob_Hostile : Mob, IAggressiveMob
 
     public override MobData CreateMobData()
     {
-        return new MobData(id, maxHP, moveSpeed, turnSpeed, attackDamage, attackSpeed, attackRange);
+        MobData newMobData = new MobData(id, maxHP, moveSpeed, turnSpeed, attackDamage, attackSpeed, attackRange);
+        newMobData.terrifiedMoveSpeed = moveSpeed * terrifiedSpeedBoostPercentage;
+        newMobData.terrifiedturnSpeed = turnSpeed * terrifiedSpeedBoostPercentage;
+        return newMobData;
     }
 }

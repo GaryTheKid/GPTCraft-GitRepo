@@ -16,12 +16,20 @@ MonoBehaviour:
   mobName: Pig
   mobPrefab: {fileID: 2771602984105295743, guid: ca9db8cdc6313f142835481599aded34, type: 3}
   mobSpawnTime: 0
-  mobSpawnBiomes: 00000000
+  mobSpawnBiomes: 0000000001000000
   isSunlightSensitive: 0
-  mobDeathDropItemPrefab: {fileID: 7178191589200727309, guid: 6d932741ce263e2499ea60f6c37a4641, type: 3}
-  moveSpeed: 3
-  turnSpeed: 1
-  jumpForce: 1.5
-  explorationRange: 10
+  mobDeathDropItem: {fileID: 11400000, guid: 70c933dd093609c43aa040d415e585a4, type: 2}
   mobHeight: 1
+  moveSpeed: 1.5
+  turnSpeed: 5
+  jumpForce: 650
+  explorationRange: 10
+  terrifiedSpeedBoostPercentage: 0
   maxHP: 10
+  mobActivity: 0.55
+  idleStateLength: 5
+  roamPerformTimer: 2
+  roamStateLength: 4
+  terrifiedPerformTimer: 0.3
+  terrifiedStateLength: 3.5
+  chasePerformTimer: 0

@@ -183,12 +183,12 @@ public class Pathfinding : MonoBehaviour
         // 这里实现判断给定位置是否可通过的逻辑，根据你的需求来修改
         // 这里简单地假设所有的点都是可通过的，你需要根据实际情况来修改这个函数
 
-        bool isWalkable = !TerrainManager.singleton.GetWorldCoordBlockWalkability(position + new Vector3Int(0, -1, 0));
+        bool isWalkable = !TerrainManager.singleton.IsBlockWalkable(position + new Vector3Int(0, -1, 0));
 
         for (int i = 0; i < height; i++)
         {
             Vector3Int tileAbove = position + new Vector3Int(0, i, 0);
-            isWalkable &= TerrainManager.singleton.GetWorldCoordBlockWalkability(tileAbove);
+            isWalkable &= TerrainManager.singleton.IsBlockWalkable(tileAbove);
         }
 
         return isWalkable;

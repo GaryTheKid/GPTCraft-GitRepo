@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c229e7166f9658040b9f360c20092730, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mobClass: {fileID: 0}
+  mobController: {fileID: 2771602984105295492}
 --- !u!1 &2771602984105295743
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,8 +127,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
-  stateSwitchCD: 5
-  statePerformCD: 0.5
 --- !u!114 &2771602984105295492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,7 +217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91d2e4fa557b6e842a738481c0650a02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mobClass: {fileID: 2771602984105295492}
+  mobController: {fileID: 2771602984105295492}
 --- !u!1 &2771602984591426197
 GameObject:
   m_ObjectHideFlags: 0

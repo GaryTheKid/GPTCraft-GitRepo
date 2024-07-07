@@ -21,7 +21,7 @@ public class MobWorldCoordDetector : MonoBehaviour
         {
             // 如果射线击中了地面格子
             // 将击中点的位置设置为 aiClass 的世界坐标
-            mobClass.SetWorldCoord(hit.point);
+            mobClass.UpdateWorldCoord(hit.point);
         }
     }
 }

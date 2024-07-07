@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MobRayHillDetector : MonoBehaviour
 {
-    public MobWorldController mobClass;
+    public MobWorldController mobController;
 
     void Update()
     {
@@ -20,12 +20,12 @@ public class MobRayHillDetector : MonoBehaviour
         if (Physics.Raycast(rayOrigin, rayDirection, out hit, rayLength, LayerMask.GetMask("Default")))
         {
             // 如果击中的是山丘，则将 aiClass 中的 hasHillAtFront 设置为 true
-            mobClass.hasHillAtFront = true;
+            mobController.hasHillAtFront = true;
         }
         else
         {
             // 如果射线未击中任何物体，则将 aiClass 中的 hasHillAtFront 设置为 false
-            mobClass.hasHillAtFront = false;
+            mobController.hasHillAtFront = false;
         }
     }
 }

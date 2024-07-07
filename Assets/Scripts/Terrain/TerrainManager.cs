@@ -121,6 +121,7 @@ public class TerrainManager : MonoBehaviour
         { BlockDir.BottomBack, new Vector3(-1, -1, 0) },
     };
 
+    #region Unity Functions
     private void Awake()
     {
         if (singleton == null)
@@ -128,7 +129,6 @@ public class TerrainManager : MonoBehaviour
             singleton = this;
         }
     }
-
     void Start()
     {
         resourceAssets = ResourceAssets.singleton;
@@ -136,7 +136,6 @@ public class TerrainManager : MonoBehaviour
         biomeDictRef_byIndices = ResourceAssets.singleton.biomes_byIndices;
         StartCoroutine(GenerateInitialTerrainCoroutine());
     }
-
     void Update()
     {
         if (!player.activeInHierarchy)
@@ -147,40 +146,10 @@ public class TerrainManager : MonoBehaviour
         Vector3Int playerChunkPosition = CalculatePlayerChunkPosition();
         HandleChunkDynamicLoading(playerChunkPosition);
     }
+    #endregion
 
-    public IEnumerator GenerateInitialTerrainCoroutine()
-    {
-        allTerrainChunks = new Dictionary<Vector3Int, TerrainChunk>();
-        allTerrainChunkSurfaceHeights = new Dictionary<Vector2Int, int[,]>();
-        allTerrainChunkBiomes = new Dictionary<Vector2Int, Biome[,]>();
-        crossChunkVegeBuffer = new Dictionary<Vector3Int, List<VegeBlock>>();
-        activeChunkPositions = new HashSet<Vector3Int>();
 
-        for (int x = 0; x < worldChunkSizeX; x++)
-        {
-            for (int y = 0; y < worldChunkSizeY; y++)
-            {
-                for (int z = 0; z < worldChunkSizeZ; z++)
-                {
-                    Vector3Int newCoord = new Vector3Int(x, y, z);
-                    allTerrainChunks[newCoord] = CreateChunkAt(x, y, z);
-                    activeChunkPositions.Add(newCoord);
-
-                    // 每生成一定数量的Chunks后，暂停直到下一帧
-                    if ((x * worldChunkSizeY * worldChunkSizeZ + y * worldChunkSizeZ + z) % chunksPerFrame == 0)
-                    {
-                        yield return null; // 暂停直到下一帧
-                    }
-                }
-            }
-        }
-
-        DrawAllChunkMeshes();
-
-        // player dynamic load debug
-        player.SetActive(true);
-    }
-
+    #region Dynamic Chunk Loading
     public void HandleChunkDynamicLoading(Vector3Int playerChunkPosition)
     {
         if (playerChunkPosition != lastPlayerChunkPosition)
@@ -196,7 +165,6 @@ public class TerrainManager : MonoBehaviour
             lastPlayerChunkPosition = playerChunkPosition;
         }
     }
-
     private void UpdateChunksToLoadAndUnload(Vector3Int playerChunkPosition)
     {
         chunksToLoad.Clear();
@@ -224,7 +192,6 @@ public class TerrainManager : MonoBehaviour
             }
         }
     }
-
     public IEnumerator UpdateChunkLoadingCoroutine()
     {
         chunkLoadCounter = 0;
@@ -259,7 +226,6 @@ public class TerrainManager : MonoBehaviour
             }
         }
     }
-
     public void LoadChunk(Vector3Int chunkCood)
     {
         if (allTerrainChunks.ContainsKey(chunkCood))
@@ -287,7 +253,6 @@ public class TerrainManager : MonoBehaviour
         // draw
         DrawChunkMesh(chunkCood);
     }
-
     public void UnloadChunk(Vector3Int chunkCood)
     {
         if (allTerrainChunks.ContainsKey(chunkCood))
@@ -302,7 +267,42 @@ public class TerrainManager : MonoBehaviour
             CheckRedrawNeighbors(chunkCood);
         }
     }
+    #endregion
 
+
+    #region Chunk Generation
+    public IEnumerator GenerateInitialTerrainCoroutine()
+    {
+        allTerrainChunks = new Dictionary<Vector3Int, TerrainChunk>();
+        allTerrainChunkSurfaceHeights = new Dictionary<Vector2Int, int[,]>();
+        allTerrainChunkBiomes = new Dictionary<Vector2Int, Biome[,]>();
+        crossChunkVegeBuffer = new Dictionary<Vector3Int, List<VegeBlock>>();
+        activeChunkPositions = new HashSet<Vector3Int>();
+
+        for (int x = 0; x < worldChunkSizeX; x++)
+        {
+            for (int y = 0; y < worldChunkSizeY; y++)
+            {
+                for (int z = 0; z < worldChunkSizeZ; z++)
+                {
+                    Vector3Int newCoord = new Vector3Int(x, y, z);
+                    allTerrainChunks[newCoord] = CreateChunkAt(x, y, z);
+                    activeChunkPositions.Add(newCoord);
+
+                    // 每生成一定数量的Chunks后，暂停直到下一帧
+                    if ((x * worldChunkSizeY * worldChunkSizeZ + y * worldChunkSizeZ + z) % chunksPerFrame == 0)
+                    {
+                        yield return null; // 暂停直到下一帧
+                    }
+                }
+            }
+        }
+
+        DrawAllChunkMeshes();
+
+        // player dynamic load debug
+        player.SetActive(true);
+    }
     public void DrawAllChunkMeshes()
     {
         for (int x = 0; x < worldChunkSizeX; x++)
@@ -316,12 +316,10 @@ public class TerrainManager : MonoBehaviour
             }
         }
     }
-
     public void DrawChunkMesh(Vector3Int ChunkCood)
     {
         allTerrainChunks[ChunkCood].DrawTerrainMesh();
     }
-
     private TerrainChunk CreateChunkAt(int x, int y, int z)
     {
         Vector3 position = new Vector3(x * chunkSizeX, y * chunkSizeY, z * chunkSizeZ);
@@ -335,7 +333,6 @@ public class TerrainManager : MonoBehaviour
             CalculateBiomes(posX, posY));
         return chunk;
     }
-
     private int[,] CalculateChunkSurfaceHeights(int chunkX, int chunkZ)
     {
         // check if surface height already exists
@@ -370,7 +367,6 @@ public class TerrainManager : MonoBehaviour
 
         return yMax;
     }
-
     private Biome[,] CalculateBiomes(int chunkX, int chunkZ)
     {
         // check if biomes already exists
@@ -403,7 +399,14 @@ public class TerrainManager : MonoBehaviour
 
         return biomes;
     }
+    private bool IsChunkExistAndActive(Vector3Int chunkCood)
+    {
+        return allTerrainChunks.ContainsKey(chunkCood) && allTerrainChunks[chunkCood].gameObject.activeInHierarchy;
+    }
+    #endregion
 
+
+    #region Block Info
     public bool TryGetBlockInfoAt(Vector3Int worldCood, out TerrainBlockData terrainBlockData)
     {
         ConvertWorldCoodToChunkAndLocalCood(worldCood, out Vector3Int chunkCood, out Byte3 localCood);
@@ -418,7 +421,100 @@ public class TerrainManager : MonoBehaviour
         terrainBlockData = new TerrainBlockData();
         return false;
     }
+    public bool TryGetActiveBlockWorldCood(Vector3 chunkPos, Byte3 blockLocalCood, out Vector3Int worldCood)
+    {
+        worldCood = Vector3Int.zero;
 
+        // if chunk exist
+        Vector3Int chunkCood = ConvertChunkPosToCood(chunkPos);
+
+        if (IsChunkExistAndActive(chunkCood))
+        {
+            worldCood = GetBlockWorldCood(chunkPos, blockLocalCood);
+            return true;
+        }
+
+        return false;
+    }
+    public Vector3Int GetBlockWorldCood(Vector3 chunkPos, Byte3 blockLocalCood)
+    {
+        return new Vector3Int(blockLocalCood.x + (int)chunkPos.x, blockLocalCood.y + (int)chunkPos.y, blockLocalCood.z + (int)chunkPos.z);
+    }
+    public bool IsBlockExist(Vector3Int chunkCoord, Byte3 blockLocalCood)
+    {
+        // if chunk exist
+        if (IsChunkExistAndActive(chunkCoord))
+        {
+            return !allTerrainChunks[chunkCoord].allTerrainBlockData[blockLocalCood.x, blockLocalCood.y, blockLocalCood.z].IsBlockEmpty();
+        }
+
+        return false;
+    }
+    public bool IsBlockExist(Vector3Int worldCoord)
+    {
+        ConvertWorldCoodToChunkAndLocalCood(worldCoord, out Vector3Int chunkCoord, out Byte3 localCood);
+
+        // if chunk exist
+        if (IsChunkExistAndActive(chunkCoord))
+        {
+            return !allTerrainChunks[chunkCoord].allTerrainBlockData[localCood.x, localCood.y, localCood.z].IsBlockEmpty();
+        }
+
+        return false;
+    }
+    public bool IsBlockWalkable(Vector3Int worldCoord)
+    {
+        if (!IsBlockExist(worldCoord))
+        {
+            return true;
+        }
+
+        if (!TryGetBlockInfoAt(worldCoord, out TerrainBlockData terrainBlockData))
+        {
+            return false;
+        }
+
+        if (blockDictRef[terrainBlockData.blockType].isGeneratingCollision)
+        {
+            return false;
+        }
+
+        return true;
+    }
+    public bool IsBlockTransparent(Vector3Int worldCoord)
+    {
+        ConvertWorldCoodToChunkAndLocalCood(worldCoord, out Vector3Int chunkCoord, out Byte3 localCood);
+
+        // if chunk exist
+        if (IsChunkExistAndActive(chunkCoord))
+        {
+            return blockDictRef[allTerrainChunks[chunkCoord].allTerrainBlockData[localCood.x, localCood.y, localCood.z].blockType].isTransparent;
+        }
+
+        return false;
+    }
+    public bool IsBlockDirectional(byte blockID)
+    {
+        return resourceAssets.blocks[blockID].directionalState != BlockDirectionalState.N;
+    }
+    public bool IsBlockInteractble(byte blockID)
+    {
+        return resourceAssets.blocks[blockID].isInteractable;
+    }
+    public bool IsBlockInBound(Vector3Int worldCood)
+    {
+        ConvertWorldCoodToChunkAndLocalCood(worldCood, out Vector3Int chunkCood, out Byte3 localCood);
+
+        return IsChunkExistAndActive(chunkCood);
+    }
+    public IBlock_InteractableBlock GetBlockInteraction(byte blockID)
+    {
+        return resourceAssets.blocks[blockID] as IBlock_InteractableBlock;
+    }
+    #endregion
+
+
+    #region Block Interaction
     public void DestroyBlockAt(Vector3Int worldCood)
     {
         ConvertWorldCoodToChunkAndLocalCood(worldCood, out Vector3Int chunkCood, out Byte3 localCoord);
@@ -444,12 +540,11 @@ public class TerrainManager : MonoBehaviour
             CheckRedrawNeighbors(localCoord, chunkCood);
         }
     }
-
     public void ConstructBlockAt(Vector3Int worldCoord, byte blockID)
     {
         ConvertWorldCoodToChunkAndLocalCood(worldCoord, out Vector3Int chunkCoord, out Byte3 localCoord);
 
-        if (GetWorldCoordBlockExistence(chunkCoord, localCoord))
+        if (IsBlockExist(chunkCoord, localCoord))
         {
             return;
         }
@@ -467,12 +562,11 @@ public class TerrainManager : MonoBehaviour
             CheckRedrawNeighbors(localCoord, chunkCoord);
         }
     }
-
     public void ConstructBlockAt(Vector3Int worldCoord, byte blockID, Vector3 blockDir)
     {
         ConvertWorldCoodToChunkAndLocalCood(worldCoord, out Vector3Int chunkCoord, out Byte3 localCoord);
 
-        if (GetWorldCoordBlockExistence(chunkCoord, localCoord))
+        if (IsBlockExist(chunkCoord, localCoord))
         {
             return;
         }
@@ -490,22 +584,10 @@ public class TerrainManager : MonoBehaviour
             CheckRedrawNeighbors(localCoord, chunkCoord);
         }
     }
+    #endregion
 
-    public bool IsBlockDirectional(byte blockID)
-    {
-        return resourceAssets.blocks[blockID].directionalState != BlockDirectionalState.N;
-    }
 
-    public bool IsBlockInteractble(byte blockID)
-    {
-        return resourceAssets.blocks[blockID].isInteractable;
-    }
-
-    public IBlock_InteractableBlock GetBlockInteraction(byte blockID)
-    {
-        return resourceAssets.blocks[blockID] as IBlock_InteractableBlock;
-    }
-
+    #region Utilities
     private void CheckRedrawNeighbors(Vector3Int chunkCood)
     {
         // iterate through all neighbors' faces (opposite)
@@ -523,7 +605,6 @@ public class TerrainManager : MonoBehaviour
         if (IsChunkExistAndActive(topNeighbor)) DrawChunkMesh(topNeighbor);
         if (IsChunkExistAndActive(bottomNeighbor)) DrawChunkMesh(bottomNeighbor);
     }
-
     private void CheckRedrawNeighbors(Byte3 localCood, Vector3Int chunkCood)
     {
         // iterate through all neighbors' faces (opposite)
@@ -541,85 +622,6 @@ public class TerrainManager : MonoBehaviour
         if (localCood.y == chunkSizeY - 1 && IsChunkExistAndActive(topNeighbor)) DrawChunkMesh(topNeighbor);
         if (localCood.y == 0 && IsChunkExistAndActive(bottomNeighbor)) DrawChunkMesh(bottomNeighbor);
     }
-
-    public Vector3Int GetWorldCood(Vector3 chunkPos, Byte3 blockLocalCood)
-    {
-        return new Vector3Int(blockLocalCood.x + (int)chunkPos.x, blockLocalCood.y + (int)chunkPos.y, blockLocalCood.z + (int)chunkPos.z);
-    }
-
-    public bool TryGetActiveWorldCood(Vector3 chunkPos, Byte3 blockLocalCood, out Vector3Int worldCood)
-    {
-        worldCood = Vector3Int.zero;
-
-        // if chunk exist
-        Vector3Int chunkCood = ConvertChunkPosToCood(chunkPos);
-
-        if (IsChunkExistAndActive(chunkCood))
-        {
-            worldCood = GetWorldCood(chunkPos, blockLocalCood);
-            return true;
-        }
-
-        return false;
-    }
-
-    public bool GetWorldCoordBlockExistence(Vector3Int chunkCoord, Byte3 blockLocalCood)
-    {
-        // if chunk exist
-        if (IsChunkExistAndActive(chunkCoord))
-        {
-            return !allTerrainChunks[chunkCoord].allTerrainBlockData[blockLocalCood.x, blockLocalCood.y, blockLocalCood.z].IsBlockEmpty();
-        }
-
-        return false;
-    }
-
-    public bool GetWorldCoordBlockExistence(Vector3Int worldCoord)
-    {
-        ConvertWorldCoodToChunkAndLocalCood(worldCoord, out Vector3Int chunkCoord, out Byte3 localCood);
-
-        // if chunk exist
-        if (IsChunkExistAndActive(chunkCoord))
-        {
-            return !allTerrainChunks[chunkCoord].allTerrainBlockData[localCood.x, localCood.y, localCood.z].IsBlockEmpty();
-        }
-
-        return false;
-    }
-
-    public bool GetWorldCoordBlockWalkability(Vector3Int worldCoord) 
-    {
-        if (!GetWorldCoordBlockExistence(worldCoord))
-        {
-            return true;
-        }
-
-        if (!TryGetBlockInfoAt(worldCoord, out TerrainBlockData terrainBlockData)) 
-        {
-            return false;
-        }
-
-        if (blockDictRef[terrainBlockData.blockType].isGeneratingCollision)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public bool GetWorldCoordBlockTransparency(Vector3Int worldCoord)
-    {
-        ConvertWorldCoodToChunkAndLocalCood(worldCoord, out Vector3Int chunkCoord, out Byte3 localCood);
-
-        // if chunk exist
-        if (IsChunkExistAndActive(chunkCoord))
-        {
-            return blockDictRef[allTerrainChunks[chunkCoord].allTerrainBlockData[localCood.x, localCood.y, localCood.z].blockType].isTransparent;
-        }
-
-        return false;
-    }
-
     public bool ShouldDrawFace(Vector3Int worldCoord)
     {
         ConvertWorldCoodToChunkAndLocalCood(worldCoord, out Vector3Int chunkCoord, out Byte3 localCood);
@@ -639,26 +641,18 @@ public class TerrainManager : MonoBehaviour
 
         return true;
     }
-
-    public bool IsBlockInBound(Vector3Int worldCood)
-    {
-        ConvertWorldCoodToChunkAndLocalCood(worldCood, out Vector3Int chunkCood, out Byte3 localCood);
-
-        return IsChunkExistAndActive(chunkCood);
-    }
-
     public int GetNeighberBlockLocalHeight(Vector2Int neighbourCoord, int height, int searchHeight)
     {
         for (int i = 1; i >= -1; i--)
         {
-            if (!GetWorldCoordBlockExistence(new Vector3Int(neighbourCoord.x, height + i, neighbourCoord.y)))
+            if (!IsBlockExist(new Vector3Int(neighbourCoord.x, height + i, neighbourCoord.y)))
             {
                 continue;
             }
 
             for (int j = 1; j <= searchHeight; j++)
             {
-                if (GetWorldCoordBlockExistence(new Vector3Int(neighbourCoord.x, height + i + j, neighbourCoord.y)))
+                if (IsBlockExist(new Vector3Int(neighbourCoord.x, height + i + j, neighbourCoord.y)))
                 {
                     return height + i + j;
                 }
@@ -669,7 +663,6 @@ public class TerrainManager : MonoBehaviour
         
         return 999;
     }
-
     public Vector3Int GetHitPointWorldCood(Vector3 hitPoint)
     {
         return new Vector3Int(
@@ -677,7 +670,6 @@ public class TerrainManager : MonoBehaviour
             Mathf.FloorToInt(hitPoint.y),
             Mathf.FloorToInt(hitPoint.z));
     }
-
     private Vector3Int ConvertChunkPosToCood(Vector3 chunkPos)
     {
         return new Vector3Int(
@@ -685,7 +677,6 @@ public class TerrainManager : MonoBehaviour
             Mathf.FloorToInt(chunkPos.y / chunkSizeY),
             Mathf.FloorToInt(chunkPos.z / chunkSizeZ));
     }
-
     private Vector3Int ConvertWorldCoodToChunkCood(Vector3Int worldCood)
     {
         return new Vector3Int(
@@ -693,7 +684,6 @@ public class TerrainManager : MonoBehaviour
             Mathf.FloorToInt((float)worldCood.y / chunkSizeY),
             Mathf.FloorToInt((float)worldCood.z / chunkSizeZ));
     }
-
     private void ConvertWorldCoodToChunkAndLocalCood(Vector3Int worldCood, out Vector3Int chunkCood, out Byte3 localCood)
     {
         chunkCood = new Vector3Int(
@@ -706,12 +696,6 @@ public class TerrainManager : MonoBehaviour
             (byte)(worldCood.y - (chunkCood.y * chunkSizeY)),
             (byte)(worldCood.z - (chunkCood.z * chunkSizeZ)));
     }
-
-    private bool IsChunkExistAndActive(Vector3Int chunkCood)
-    {
-        return allTerrainChunks.ContainsKey(chunkCood) && allTerrainChunks[chunkCood].gameObject.activeInHierarchy;
-    }
-
     private Vector3Int CalculatePlayerChunkPosition()
     {
         Vector3 playerPos = player.transform.position;
@@ -720,4 +704,10 @@ public class TerrainManager : MonoBehaviour
             Mathf.FloorToInt(playerPos.y / chunkSizeY),
             Mathf.FloorToInt(playerPos.z / chunkSizeZ));
     }
+    public BiomeType GetWorldCoordBiomeType(Vector3Int worldCood)
+    {
+        ConvertWorldCoodToChunkAndLocalCood(worldCood, out Vector3Int chunkCoord, out Byte3 localCoord);
+        return allTerrainChunkBiomes[new Vector2Int(chunkCoord.x * chunkSizeX, chunkCoord.z * chunkSizeZ)][localCoord.x, localCoord.z].biomeType;
+    }
+    #endregion
 }

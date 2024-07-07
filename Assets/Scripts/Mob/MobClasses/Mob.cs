@@ -21,17 +21,32 @@ public abstract class Mob : ScriptableObject
     public MobSpawnTime mobSpawnTime;
     public List<BiomeType> mobSpawnBiomes;
     public bool isSunlightSensitive;
-    public GameObject mobDeathDropItemPrefab;
+    public Item mobDeathDropItem;
 
     [Space(25)]
 
-    [Header("====== Base Stats ======")]
+    [Header("====== Base Stats -- Collision ======")]
+    public int mobHeight;
+
+    [Header("====== Base Stats -- Movement ======")]
     public float moveSpeed;
     public float turnSpeed;
     public float jumpForce;
     public int explorationRange;
-    public int mobHeight;
+    public float terrifiedSpeedBoostPercentage;
+
+    [Header("====== Base Stats -- Survival ======")]
     public short maxHP;
+
+    [Header("====== Base Stats -- State ======")]
+    public float mobActivity; // 决定了Mob在闲置时游走/发呆的概率，越大越倾向游走
+    public float idleStateLength;
+    public float roamPerformTimer;
+    public float roamStateLength;
+    public float terrifiedPerformTimer;
+    public float terrifiedStateLength;
+    public float chasePerformTimer;
+    
 
     // functions
     public abstract MobData CreateMobData();
@@ -51,6 +66,10 @@ public class MobData
     public byte attackDamage;
     public float attackSpeed;
     public float attackRange;
+    public bool isTerrified;
+    public float terrifiedMoveSpeed;
+    public float terrifiedturnSpeed;
+
     public MobData() { }
 
     public MobData(byte id)
@@ -93,6 +112,7 @@ public class MobData
         newMobData.attackDamage = attackDamage;
         newMobData.attackSpeed = attackSpeed;
         newMobData.attackRange = attackRange;
+        newMobData.isTerrified = false;
 
         return newMobData;
     }

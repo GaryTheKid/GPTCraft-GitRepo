@@ -6,51 +6,46 @@ public class MobBrain : MonoBehaviour
     {
         Idle,
         Roam,
+        Flee,
         Chase,
         Attack
     }
-
     public MobState currentState = MobState.Idle;
-
-    public float stateSwitchCD = 5f;
-    public float statePerformCD = 3f;
 
     private float stateTimer = 0f;
     private bool isPerforming = false;
 
     private MobWorldController mobWorldController;
     private Mob mobClass;
-
+    private MobData mobData;
     private IAggressiveMob iAggressiveMob;
 
+
+    #region Unity Functions
     private void Awake()
     {
         mobWorldController = GetComponent<MobWorldController>();
     }
-
     void Update()
     {
         // 根据当前状态执行不同的行为
         switch (currentState)
         {
-            case MobState.Idle:
-                Idle();
-                break;
-            case MobState.Roam:
-                Roam();
-                break;
-            case MobState.Chase:
-                Chase();
-                break;
-            case MobState.Attack:
-                Attack();
-                break;
+            case MobState.Idle: Idle(); break;
+            case MobState.Roam: Roam(); break;
+            case MobState.Flee: Flee(); break;
+            case MobState.Chase: Chase(); break;
+            case MobState.Attack: Attack(); break;
         }
     }
+    #endregion
 
-    public void SetMobBrain(Mob mobClass)
+
+    #region Setting
+    public void SetMobBrain(Mob mobClass, MobData mobData)
     {
         this.mobClass = mobClass;
+        this.mobData = mobData;
 
         if (mobClass is IAggressiveMob)
         {
@@ -59,14 +54,16 @@ public class MobBrain : MonoBehaviour
 
         ResetMobBrain();
     }
-
     public void ResetMobBrain()
     {
         stateTimer = 0f;
         isPerforming = false;
         currentState = MobState.Idle;
     }
+    #endregion
 
+
+    #region States
     void Idle()
     {
         if (mobWorldController.chaseTarget != null)
@@ -76,15 +73,21 @@ public class MobBrain : MonoBehaviour
             currentState = MobState.Chase;
         }
 
+        if (mobData.isTerrified)
+        {
+            stateTimer = 0f;
+            isPerforming = false;
+            currentState = MobState.Flee;
+        }
+
         stateTimer += Time.deltaTime;
 
-        if (stateTimer > stateSwitchCD)
+        if (stateTimer > mobClass.idleStateLength)
         {
             stateTimer = 0f;
             isPerforming = false;
 
-            // 根据 50% 概率切换到 Idle 或 Roam
-            if (Random.value < 0.5f)
+            if (Random.value > mobClass.mobActivity)
             {
                 currentState = MobState.Idle;
             }
@@ -94,8 +97,51 @@ public class MobBrain : MonoBehaviour
             }
         }
     }
-
     void Roam()
+    {
+        if (mobWorldController.chaseTarget != null)
+        {
+            stateTimer = 0f;
+            isPerforming = false;
+            currentState = MobState.Chase;
+        }
+
+        if (mobData.isTerrified)
+        {
+            stateTimer = 0f;
+            isPerforming = false;
+            currentState = MobState.Flee;
+        }
+
+        stateTimer += Time.deltaTime;
+
+        // perform state
+        if (stateTimer > mobClass.roamPerformTimer && !isPerforming)
+        {
+            isPerforming = true;
+
+            // perform roam
+            mobWorldController.UpdateWalkableNodes();
+            mobWorldController.RoamToRandomCoord();
+        }
+
+        // switch state
+        if (stateTimer > mobClass.roamStateLength)
+        {
+            stateTimer = 0f;
+            isPerforming = false;
+
+            if (Random.value > mobClass.mobActivity)
+            {
+                currentState = MobState.Idle;
+            }
+            else
+            {
+                currentState = MobState.Roam;
+            }
+        }
+    }
+    void Flee()
     {
         if (mobWorldController.chaseTarget != null)
         {
@@ -107,23 +153,22 @@ public class MobBrain : MonoBehaviour
         stateTimer += Time.deltaTime;
 
         // perform state
-        if (stateTimer > statePerformCD && !isPerforming)
+        if (stateTimer > mobClass.terrifiedPerformTimer && !isPerforming)
         {
             isPerforming = true;
 
             // perform roam
             mobWorldController.UpdateWalkableNodes();
-            mobWorldController.RoamToRandomCoord();
+            mobWorldController.FleeToRandomCoord();
         }
 
         // switch state
-        if (stateTimer > stateSwitchCD)
+        if (stateTimer > mobClass.terrifiedStateLength)
         {
             stateTimer = 0f;
             isPerforming = false;
 
-            // 根据 50% 概率切换到 Idle 或 Roam
-            if (Random.value < 0.5f)
+            if (Random.value > mobClass.mobActivity)
             {
                 currentState = MobState.Idle;
             }
@@ -133,7 +178,6 @@ public class MobBrain : MonoBehaviour
             }
         }
     }
-
     void Chase()
     {
         if (iAggressiveMob == null)
@@ -147,7 +191,7 @@ public class MobBrain : MonoBehaviour
             stateTimer += Time.deltaTime;
 
             // perform state
-            if (stateTimer > statePerformCD && !isPerforming)
+            if (stateTimer > mobClass.chasePerformTimer && !isPerforming)
             {
                 isPerforming = true;
                 stateTimer = 0f;
@@ -175,9 +219,7 @@ public class MobBrain : MonoBehaviour
         stateTimer = 0f;
         isPerforming = false;
 
-
-        // 根据 50% 概率切换到 Idle 或 Roam
-        if (Random.value < 0.5f)
+        if (Random.value > mobClass.mobActivity)
         {
             currentState = MobState.Idle;
         }
@@ -186,7 +228,6 @@ public class MobBrain : MonoBehaviour
             currentState = MobState.Roam;
         }
     }
-
     void Attack()
     {
         if (iAggressiveMob == null)
@@ -231,8 +272,7 @@ public class MobBrain : MonoBehaviour
         isPerforming = false;
 
 
-        // 根据 50% 概率切换到 Idle 或 Roam
-        if (Random.value < 0.5f)
+        if (Random.value > mobClass.mobActivity)
         {
             currentState = MobState.Idle;
         }
@@ -241,7 +281,10 @@ public class MobBrain : MonoBehaviour
             currentState = MobState.Roam;
         }
     }
+    #endregion
 
+
+    #region Utilities 
     private float GetTargetDist()
     {
         if (mobWorldController.chaseTarget != null)
@@ -251,4 +294,5 @@ public class MobBrain : MonoBehaviour
 
         return -1f;
     }
+    #endregion
 }

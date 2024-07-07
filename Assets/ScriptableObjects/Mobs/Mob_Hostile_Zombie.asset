@@ -18,13 +18,21 @@ MonoBehaviour:
   mobSpawnTime: 1
   mobSpawnBiomes: 00000000010000000200000003000000
   isSunlightSensitive: 1
-  mobDeathDropItemPrefab: {fileID: 7178191589200727309, guid: 31f12a3d3e46a974fabe1f62042ab790, type: 3}
-  moveSpeed: 3
-  turnSpeed: 1
-  jumpForce: 1.5
-  explorationRange: 10
+  mobDeathDropItem: {fileID: 11400000, guid: 5b2a8fa034cd31b499353ac79c656be5, type: 2}
   mobHeight: 2
+  moveSpeed: 2
+  turnSpeed: 5
+  jumpForce: 650
+  explorationRange: 10
+  terrifiedSpeedBoostPercentage: 0
   maxHP: 15
+  mobActivity: 0.6
+  idleStateLength: 5
+  roamPerformTimer: 3
+  roamStateLength: 5
+  terrifiedPerformTimer: 0.3
+  terrifiedStateLength: 0.8
+  chasePerformTimer: 3
   attackDamage: 2
   attackSpeed: 1
   attackRange: 2

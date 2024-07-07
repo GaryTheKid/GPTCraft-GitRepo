@@ -23,6 +23,8 @@ public class TimeManager : MonoBehaviour
 
     private int lastEnemySpawnHour;
 
+
+    #region Unity Functions
     private void Awake()
     {
         if (singleton == null)
@@ -32,7 +34,6 @@ public class TimeManager : MonoBehaviour
 
         lightManager = LightManager.singleton;
     }
-
     private void Update()
     {
         // 累积时间
@@ -59,6 +60,9 @@ public class TimeManager : MonoBehaviour
             UpdateLight();
         }
 
+        // 生物生成
+        HandleSpawnMobs();
+
         // Day / Night time events
         switch (CurrentDayNightState)
         {
@@ -70,12 +74,15 @@ public class TimeManager : MonoBehaviour
 
             case DayNightState.Night:
                 {
-                    HandleSpawnAggressiveEnemyAIs();
+                    
                 }
                 break;
         }
     }
+    #endregion
 
+
+    #region Timer
     public void AddMinutes(int minutesToAdd)
     {
         // 增加分钟
@@ -88,7 +95,6 @@ public class TimeManager : MonoBehaviour
             AddHours(1);
         }
     }
-
     public void AddHours(int hoursToAdd)
     {
         // 增加小时
@@ -101,33 +107,29 @@ public class TimeManager : MonoBehaviour
             AddDays(1);
         }
     }
-
     public void AddDays(int daysToAdd)
     {
         // 增加天数
         days += daysToAdd;
     }
-
-    // 获取当前时间的方法
-    public string GetCurrentTime()
-    {
-        return string.Format("{0:D2}:{1:D2}:{2:D2}", hours, minutes, days);
-    }
-
-    // 将分钟和小时转换为 0 到 24 的小数
     private float ConvertToDecimalTime()
     {
         return hours + (minutes / 60f);
     }
+    public string GetCurrentTime()
+    {
+        return string.Format("{0:D2}:{1:D2}:{2:D2}", hours, minutes, days);
+    }
+    #endregion
 
-    // 更新光照颜色
+
+    #region Time based Events
     private void UpdateLight()
     {
         // 使用 LightManager 中的 EvaluateColors 函数来更新颜色
         lightManager.EvaluateGlobalLight(ConvertToDecimalTime());
     }
-    
-    private void HandleSpawnAggressiveEnemyAIs()
+    private void HandleSpawnMobs()
     {
         if (lastEnemySpawnHour != hours)
         {
@@ -135,4 +137,21 @@ public class TimeManager : MonoBehaviour
             lastEnemySpawnHour = hours;
         }
     }
+    #endregion
+
+
+    #region Utilities
+    public MobSpawnTime ConvertToMobSpawnTime()
+    {
+        MobSpawnTime mobSpawnTime = MobSpawnTime.FullTime;
+
+        switch (CurrentDayNightState)
+        {
+            case DayNightState.Day: mobSpawnTime = MobSpawnTime.Day; break;
+            case DayNightState.Night: mobSpawnTime = MobSpawnTime.Night; break;
+        }
+
+        return mobSpawnTime;
+    }
+    #endregion
 }
