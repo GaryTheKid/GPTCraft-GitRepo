@@ -21,7 +21,7 @@ public abstract class Mob : ScriptableObject
     public MobSpawnTime mobSpawnTime;
     public List<BiomeType> mobSpawnBiomes;
     public bool isSunlightSensitive;
-    public Item mobDeathDropItem;
+    public Item mobDeathDropItem; 
 
     [Space(25)]
 
@@ -37,6 +37,7 @@ public abstract class Mob : ScriptableObject
 
     [Header("====== Base Stats -- Survival ======")]
     public short maxHP;
+    public float killEXPWorth;
 
     [Header("====== Base Stats -- State ======")]
     public float mobActivity; // 决定了Mob在闲置时游走/发呆的概率，越大越倾向游走

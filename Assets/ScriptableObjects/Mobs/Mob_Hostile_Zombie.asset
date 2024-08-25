@@ -26,6 +26,7 @@ MonoBehaviour:
   explorationRange: 10
   terrifiedSpeedBoostPercentage: 0
   maxHP: 15
+  killEXPWorth: 10
   mobActivity: 0.6
   idleStateLength: 5
   roamPerformTimer: 3

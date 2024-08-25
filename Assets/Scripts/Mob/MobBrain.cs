@@ -247,7 +247,7 @@ public class MobBrain : MonoBehaviour
                 stateTimer = 0f;
 
                 // perform chase
-                var targetDamageController = mobWorldController.chaseTarget.GetComponent<PlayerDamageController>();
+                var targetDamageController = mobWorldController.chaseTarget.GetComponent<PlayerHealthController>();
                 if (targetDamageController != null)
                 {
                     targetDamageController.TakeDamage(iAggressiveMob.GetAttackDamage());

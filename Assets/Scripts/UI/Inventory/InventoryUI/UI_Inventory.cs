@@ -118,6 +118,7 @@ public class UI_Inventory : MonoBehaviour
         }
         equipmentController.SwitchEquipmentEvent += TryEquipItem;
         interactionController.OnConstructEvent += RemoveOneItemAtIndex;
+        interactionController.OnFoodConsumptionEvent += RemoveOneItemAtIndex;
         interactionController.OnBlockDestroyEvent += UpdateItemDurability;
         weaponController.OnMeleeAttackEvent += UpdateItemDurability;
     }
@@ -136,6 +137,7 @@ public class UI_Inventory : MonoBehaviour
         }
         equipmentController.SwitchEquipmentEvent -= TryEquipItem;
         interactionController.OnConstructEvent -= RemoveOneItemAtIndex;
+        interactionController.OnFoodConsumptionEvent -= RemoveOneItemAtIndex;
         interactionController.OnBlockDestroyEvent -= UpdateItemDurability;
         weaponController.OnMeleeAttackEvent -= UpdateItemDurability;
     }

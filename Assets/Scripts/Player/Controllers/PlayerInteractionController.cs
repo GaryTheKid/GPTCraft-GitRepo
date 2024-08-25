@@ -6,6 +6,9 @@ public class PlayerInteractionController : MonoBehaviour
     public delegate void OnConstructEventHandler(int index);
     public event OnConstructEventHandler OnConstructEvent;
 
+    public delegate void OnFoodConsumptionEventHandler(int index);
+    public event OnFoodConsumptionEventHandler OnFoodConsumptionEvent;
+
     public delegate void OnBlockDestroyEventHandler(ItemData itemData, IDurable item, short durabilityChangeAmount);
     public event OnBlockDestroyEventHandler OnBlockDestroyEvent;
 
@@ -14,9 +17,12 @@ public class PlayerInteractionController : MonoBehaviour
     public Transform head;
 
     private PlayerStats stats;
+    private PlayerHealthController playerHealthController;
+    private PlayerEXPController playerEXPController;
     private TerrainManager terrainManager;
     private RaycastHit hit; // 存储射线碰撞信息
     private bool isPointingEmpty;
+    private bool isConstructionDestructionEnabled;
 
     public bool canConstruct;
     public Transform constructDetector;
@@ -29,6 +35,8 @@ public class PlayerInteractionController : MonoBehaviour
     private void Awake()
     {
         stats = GetComponent<PlayerStats>();
+        playerHealthController = GetComponent<PlayerHealthController>();
+        playerEXPController = GetComponent<PlayerEXPController>();
     }
 
     private void Start()
@@ -38,8 +46,9 @@ public class PlayerInteractionController : MonoBehaviour
 
     void Update()
     {
-        // 在Update中检测玩家光标所瞄准的方块
         DetectTargetBlock();
+        if (HandleFoodItemInteraction()) return;
+        HandleBlockConstructionAndDestruction();
     }
 
     private void DetectTargetBlock()
@@ -63,9 +72,7 @@ public class PlayerInteractionController : MonoBehaviour
             constructDetector.position = neighborBlockWorldCood + new Vector3(0.5f, 0.5f, 0.5f);
             constructDetector.rotation = Quaternion.identity;
 
-            // 处理方块破坏 && 交互 && 建造 
-            HandleDestruction();
-            HandleInteraction();
+            isConstructionDestructionEnabled = true;
         }
         else
         {
@@ -73,7 +80,36 @@ public class PlayerInteractionController : MonoBehaviour
             //Debug.DrawRay(ray.origin, ray.direction * interactionRange, Color.red);
             blockSelectHighlight.gameObject.SetActive(false);
             isPointingEmpty = true;
+
+            isConstructionDestructionEnabled = false;
         }
+    }
+
+    private void HandleBlockConstructionAndDestruction()
+    {
+        if (isConstructionDestructionEnabled)
+        {
+            HandleDestruction();
+            HandleInteraction();
+        }
+    }
+
+    private bool HandleFoodItemInteraction()
+    {
+        Item equippedItem = stats.EQUIPMENT_equippedItem;
+        if (equippedItem == null) return false;
+        if (!(equippedItem is IFood)) return false;
+
+        IFood foodItem = equippedItem as IFood;
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            OnFoodConsumptionEvent.Invoke(stats.EQUIPMENT_toolbarIndex);
+            playerHealthController.IncreaseSaturation(foodItem.GetFoodNutritionVal());
+            return true;
+        }
+
+        return false;
     }
 
     private Vector3Int GetHitPointAndDirection(out Vector3 hitPos)
@@ -258,6 +294,9 @@ public class PlayerInteractionController : MonoBehaviour
                     {
                         OnBlockDestroyEvent(stats.EQUIPMENT_equippedItemData, stats.EQUIPMENT_equippedItem as IDurable, -1);
                     }
+
+                    // 给予玩家经验值
+                    playerEXPController.GainExperience(blockData.destroyEXPWorth);
                 }
 
                 yield return null;

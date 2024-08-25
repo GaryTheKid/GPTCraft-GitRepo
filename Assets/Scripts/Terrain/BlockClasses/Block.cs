@@ -25,6 +25,7 @@ public abstract class Block : ScriptableObject
     public bool isInteractable;
     public BlockDirectionalState directionalState;
     public float toughness;
+    public float destroyEXPWorth;
 
     [Space(25)]
 

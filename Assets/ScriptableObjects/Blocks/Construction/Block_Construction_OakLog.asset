@@ -17,7 +17,11 @@ MonoBehaviour:
   dropItem: {fileID: 11400000, guid: b92755b8a67f63e44bd5ba75d8e0cde3, type: 2}
   isTransparent: 0
   isGeneratingCollision: 1
+  isStateBlock: 0
+  isInteractable: 0
+  directionalState: 0
   toughness: 2
+  destroyEXPWorth: 5
   faces:
   - dir: {x: 1, y: 0, z: 0}
     verts:

@@ -274,7 +274,7 @@ public class MobWorldController : MonoBehaviour
             mobData.hp -= damage; // 减去伤害值
             if (mobData.hp <= 0)
             {
-                Die(); // 如果生命值小于等于0，死亡
+                Die(attacker); // 如果生命值小于等于0，死亡
             }
             else
             {
@@ -337,11 +337,15 @@ public class MobWorldController : MonoBehaviour
 
         sunburnCoroutine = null;
     }
-    private void Die()
+    private void Die(Transform attacker)
     {
         Debug.Log("Enemy died!");
         // 此处可以添加敌人死亡的逻辑，例如播放死亡动画、产生死亡效果等
         // 你可以在这里销毁敌人对象或进行其他你需要的处理
+
+        // 给予击杀者经验值
+        PlayerEXPController playerEXPController = attacker.GetComponent<PlayerEXPController>();
+        if (playerEXPController != null) playerEXPController.GainExperience(mobClass.killEXPWorth);
 
         // 爆道具
         worldObjectSpawner.SpawnItem(GetMobPosInt(), mobClass.mobDeathDropItem.id, 1);

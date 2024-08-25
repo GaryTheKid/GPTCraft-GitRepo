@@ -8,6 +8,12 @@ public class PlayerStats : MonoBehaviour
     [Header("Survival")]
     public byte SURVIVAL_maxHP = 20;
     public byte SURVIVAL_HP = 20;
+    public byte SURVIVAL_maxSaturation = 20;
+    public byte SURVIVAL_saturation = 20;
+    public float SURVIVAL_saturationDecreaseInterval = 5f;
+    public short SURVIVAL_LV = 1;
+    public float SURVIVAL_EXP = 0f;
+    public float SURVIVAL_NextLVEXP = 10f;
 
     [Header("Movement")]
     public float MOVEMENT_moveSpeed = 5.0f; // ÒÆ¶¯ËÙ¶È

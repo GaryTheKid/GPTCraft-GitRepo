@@ -23,3 +23,5 @@ MonoBehaviour:
   craftingRecipe_row1: []
   craftingRecipe_row2: []
   craftingRecipe_row3: []
+  nutrition: 6
+  nutritionVariation_min: 2
