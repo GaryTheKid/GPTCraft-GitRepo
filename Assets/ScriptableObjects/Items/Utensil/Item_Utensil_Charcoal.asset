@@ -21,7 +21,7 @@ MonoBehaviour:
   craftAuth: 2
   craftingResultItemCount: 1
   craftingRecipe_row1:
-  - {fileID: 11400000, guid: e2960b4ffd6097248afcb0078aa6c3c5, type: 2}
+  - {fileID: 11400000, guid: b92755b8a67f63e44bd5ba75d8e0cde3, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   craftingRecipe_row2:
