@@ -1,6 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Burst;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 public class TerrainChunk : MonoBehaviour
 {
@@ -136,7 +139,6 @@ public class TerrainChunk : MonoBehaviour
             allTerrainBlockData[x, y, z].ConstructBlock(x, y, z, Block_Empty.refID);
         }
     }
-
     private void GetVegeBlocksFromBuffer()
     {
         if (crossChunkVegeBuffer.ContainsKey(chunkPos) && crossChunkVegeBuffer[chunkPos] != null)
@@ -406,7 +408,13 @@ public class TerrainChunk : MonoBehaviour
         mesh_forCollision.uv = allUVs_forCollision.ToArray();
         mesh_forCollision.RecalculateNormals();
         meshFilterForCollision.mesh = mesh_forCollision;
-        meshCollider_forCollision.sharedMesh = mesh_forCollision;
+
+        // 2022升级代码
+        if (allVerts_forCollision.Count > 0) meshCollider_forCollision.sharedMesh = mesh_forCollision;
+        else meshCollider_forCollision.sharedMesh = null; // Or disable collider
+
+
+
 
         // mesh for non-collision
         mesh_forNonCollision.vertices = allVerts_forNonCollision.ToArray();
@@ -414,6 +422,9 @@ public class TerrainChunk : MonoBehaviour
         mesh_forNonCollision.uv = allUVs_forNonCollision.ToArray();
         mesh_forNonCollision.RecalculateNormals();
         meshFilterForNonCollision.mesh = mesh_forNonCollision;
-        meshCollider_forNonCollision.sharedMesh = mesh_forNonCollision;
+
+        // 2022升级代码
+        if (allVerts_forNonCollision.Count > 0) meshCollider_forNonCollision.sharedMesh = mesh_forNonCollision;
+        else meshCollider_forNonCollision.sharedMesh = null; // Or disable collider
     }
 }

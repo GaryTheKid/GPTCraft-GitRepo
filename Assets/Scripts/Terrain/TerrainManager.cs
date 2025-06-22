@@ -27,6 +27,10 @@ public class TerrainManager : MonoBehaviour
     public byte chunkSizeX; // 每个TerrainChunk的尺寸
     public byte chunkSizeY; // 每个TerrainChunk的尺寸
     public byte chunkSizeZ; // 每个TerrainChunk的尺寸
+    public const int globalYMin = -64;
+    public const int globalYMax = 256;
+    private int globalChunkYMin;
+    private int globalChunkYMax;
 
 
     [Space(25)]
@@ -131,6 +135,8 @@ public class TerrainManager : MonoBehaviour
     }
     void Start()
     {
+        globalChunkYMin = globalYMin / chunkSizeY;
+        globalChunkYMax = globalYMax / chunkSizeY;
         resourceAssets = ResourceAssets.singleton;
         blockDictRef = ResourceAssets.singleton.blocks;
         biomeDictRef_byIndices = ResourceAssets.singleton.biomes_byIndices;
@@ -175,6 +181,8 @@ public class TerrainManager : MonoBehaviour
         {
             for (int y = -loadDistanceY; y <= loadDistanceY; y++)
             {
+                if (y < globalChunkYMin || y > globalChunkYMax) continue;
+
                 for (int z = -loadDistanceZ; z <= loadDistanceZ; z++)
                 {
                     Vector3Int chunkCoord = playerChunkPosition + new Vector3Int(x, y, z);
@@ -331,6 +339,7 @@ public class TerrainManager : MonoBehaviour
         chunk.GenerateChunkData(
             CalculateChunkSurfaceHeights(posX, posY),
             CalculateBiomes(posX, posY));
+
         return chunk;
     }
     private int[,] CalculateChunkSurfaceHeights(int chunkX, int chunkZ)
