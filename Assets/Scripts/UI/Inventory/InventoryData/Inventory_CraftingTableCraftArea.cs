@@ -36,6 +36,7 @@ public class Inventory_CraftingTableCraftArea : Inventory_CraftArea, I3x3CraftAr
 
         // 构建字符串表示
         string result = "";
+
         for (int row = 0; row < 3; row++)
         {
             for (int col = 0; col < 3; col++)
@@ -53,6 +54,7 @@ public class Inventory_CraftingTableCraftArea : Inventory_CraftArea, I3x3CraftAr
             }
         }
 
+        result += CraftAuth.CraftingTable.ToString();
         return result;
     }
 }

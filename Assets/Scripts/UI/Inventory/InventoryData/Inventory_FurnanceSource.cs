@@ -119,6 +119,7 @@ public class Inventory_FurnanceSource : Inventory, IFurnanceSource, I1x1CraftAre
     public string Convert1x1CraftRecipeToHashString()
     {
         InventorySlot slot = inventorySlots[0];
+        Item item = ResourceAssets.singleton.items[slot.itemData.id];
         string result = "";
         if (IsSlotEmpty(slot))
         {
@@ -126,7 +127,7 @@ public class Inventory_FurnanceSource : Inventory, IFurnanceSource, I1x1CraftAre
         }
         else
         {
-            result += ResourceAssets.singleton.items[slot.itemData.id].itemName;
+            result += item.itemName;
         }
 
         // fill 8 empty strings
@@ -134,6 +135,8 @@ public class Inventory_FurnanceSource : Inventory, IFurnanceSource, I1x1CraftAre
         {
             result += "None";
         }
+
+        result += CraftAuth.Furnance.ToString();
 
         return result;
     }

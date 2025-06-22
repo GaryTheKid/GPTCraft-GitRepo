@@ -160,6 +160,7 @@ public abstract class Item : ScriptableObject
             }
         }
 
+        hashString += craftAuth.ToString();
         return hashString;
     }
 }

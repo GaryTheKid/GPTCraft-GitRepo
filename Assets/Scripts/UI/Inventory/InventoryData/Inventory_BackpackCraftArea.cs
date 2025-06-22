@@ -53,6 +53,7 @@ public class Inventory_BackpackCraftArea : Inventory_CraftArea, I2x2CraftArea
             }
         }
 
+        result += CraftAuth.Hand.ToString();
         return result;
     }
 }
